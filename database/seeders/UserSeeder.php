@@ -7,9 +7,7 @@ use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
 {
-    /**
-     * Seed the users table with a demo user plus 50 random users.
-     */
+    
     public function run(): void
     {
         // Demo user with a known password for manual testing.

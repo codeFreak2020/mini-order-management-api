@@ -51,12 +51,10 @@ class AuthTest extends TestCase
     public function test_user_can_login(): void
     {
         $user = User::factory()->create(['password' => 'password']);
-
         $response = $this->postJson('/api/auth/login', [
             'identifier' => $user->email,
             'password' => 'password',
         ]);
-
         $response->assertStatus(200)
             ->assertJsonPath('success', true)
             ->assertJsonPath('data.user.id', $user->id)
@@ -66,36 +64,30 @@ class AuthTest extends TestCase
     public function test_user_can_login_with_phone(): void
     {
         $user = User::factory()->create(['password' => 'password']);
-
         $response = $this->postJson('/api/auth/login', [
             'identifier' => $user->phone,
             'password' => 'password',
         ]);
-
         $response->assertStatus(200)->assertJsonPath('data.user.id', $user->id);
     }
 
     public function test_user_can_login_with_username(): void
     {
         $user = User::factory()->create(['password' => 'password']);
-
         $response = $this->postJson('/api/auth/login', [
             'identifier' => $user->username,
             'password' => 'password',
         ]);
-
         $response->assertStatus(200)->assertJsonPath('data.user.id', $user->id);
     }
 
     public function test_login_fails_with_wrong_credentials(): void
     {
         $user = User::factory()->create();
-
         $response = $this->postJson('/api/auth/login', [
             'identifier' => $user->email,
             'password' => 'wrong-password',
         ]);
-
         $response->assertStatus(422)->assertJsonPath('success', false);
     }
 
@@ -103,33 +95,25 @@ class AuthTest extends TestCase
     {
         $user = User::factory()->create();
         $token = auth('api')->login($user);
-
         $response = $this->withToken($token)->postJson('/api/auth/logout');
-
         $response->assertStatus(200)->assertJsonPath('success', true);
     }
 
     public function test_user_can_refresh_token_pair(): void
     {
         $user = User::factory()->create(['password' => 'password']);
-
         $login = $this->postJson('/api/auth/login', [
             'identifier' => $user->email,
             'password' => 'password',
         ])->assertStatus(200);
-
         $refreshToken = $login->json('data.refresh_token');
-
         $response = $this->postJson('/api/auth/refresh', [
             'refresh_token' => $refreshToken,
         ]);
-
         $response->assertStatus(200)
             ->assertJsonPath('success', true)
             ->assertJsonPath('data.user.id', $user->id)
             ->assertJsonStructure(['data' => ['user', 'token', 'refresh_token']]);
-
-        // The old refresh token must be rotated (blacklisted) after use.
         $this->postJson('/api/auth/refresh', [
             'refresh_token' => $refreshToken,
         ])->assertStatus(422)->assertJsonPath('success', false);
@@ -173,7 +157,6 @@ class AuthTest extends TestCase
                 'password' => 'wrong-password',
             ])->assertStatus(422);
         }
-
         // The 6th request exceeds the auth limiter (5/min per IP).
         $this->postJson('/api/auth/login', [
             'identifier' => $user->email,

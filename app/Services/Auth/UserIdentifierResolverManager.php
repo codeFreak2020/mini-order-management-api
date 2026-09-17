@@ -7,9 +7,7 @@ use App\Models\User;
 
 class UserIdentifierResolverManager
 {
-    /**
-     * @param iterable<UserIdentifierResolver> $resolvers
-     */
+    
     public function __construct(private readonly iterable $resolvers)
     {
     }

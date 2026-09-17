@@ -42,7 +42,7 @@ Built with **Laravel 12**, **PHP 8.3**, and **MySQL**, following MVC, Eloquent, 
 | Backend    | Laravel 12 (PHP 8.2+)                        |
 | Database   | MySQL 8                                      |
 | Auth       | JWT (`php-open-source-saver/jwt-auth`)        |
-| Cache      | Redis (via `predis`, fallback: `database`)   |
+| Cache      | Redis (via `predis`)                        |
 | Queue      | Database / Redis                             |
 | Mail       | Laravel notifications (log / SMTP)           |
 | Docs       | OpenAPI 3 + Swagger UI                       |
@@ -55,7 +55,7 @@ Built with **Laravel 12**, **PHP 8.3**, and **MySQL**, following MVC, Eloquent, 
 - PHP **8.2+** with `pdo_mysql`, `mbstring`, `openssl`, `curl` extensions
 - Composer **2.x**
 - MySQL **8+**
-- (Optional) Redis **7+** for cache/queue
+- Redis **5+** (required — the default cache store is Redis; 7.x recommended)
 - (Optional) Docker + Docker Compose
 
 ---
@@ -80,13 +80,16 @@ php artisan key:generate
 #    DB_USERNAME=root
 #    DB_PASSWORD=
 
-# 5. Run migrations and seed sample data
+# 5. Start Redis (required — used for caching and rate limiting).
+#    The default config expects it on 127.0.0.1:6379 (see REDIS_HOST / REDIS_PORT in .env).
+
+# 6. Run migrations and seed sample data
 php artisan migrate --seed
 
-# 6. Start the server
+# 7. Start the server
 php artisan serve
 
-# 7. (Optional) start a queue worker so order emails are processed
+# 8. (Optional) start a queue worker so order emails are processed
 php artisan queue:work
 ```
 
@@ -222,7 +225,7 @@ If any step fails, the transaction rolls back — no partial orders or phantom s
 - Single-product lookups (`GET /api/products/{id}`) are cached via `Cache::remember("products:{id}", ttl, …)`.
 - Cache is invalidated on product **update** and **delete** (`Cache::forget`).
 - TTL is configurable with `PRODUCT_CACHE_TTL` (default `300` seconds).
-- The store is driver-agnostic: set `CACHE_STORE=redis` to use Redis, or `CACHE_STORE=database` for a zero-infrastructure fallback.
+- The default store is Redis (`CACHE_STORE=redis`); set `CACHE_STORE=database` for a zero-infrastructure fallback.
 - **Why:** `GET /products/{id}` is the most frequent read; caching avoids a DB round-trip per request.
 
 ### 2. API rate limiting

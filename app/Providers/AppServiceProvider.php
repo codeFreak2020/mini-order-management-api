@@ -13,9 +13,7 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
+    
     public function register(): void
     {
         $this->app->singleton(UserIdentifierResolverManager::class, function () {
@@ -27,9 +25,6 @@ class AppServiceProvider extends ServiceProvider
         });
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         // Default API rate limit: 60 requests per minute per user (or IP when anonymous).

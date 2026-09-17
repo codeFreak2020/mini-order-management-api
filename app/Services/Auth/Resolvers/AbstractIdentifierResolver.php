@@ -7,9 +7,7 @@ use App\Models\User;
 
 abstract class AbstractIdentifierResolver implements UserIdentifierResolver
 {
-    /**
-     * The users table column this resolver matches against.
-     */
+   
     abstract protected function column(): string;
 
     public function resolve(string $identifier): ?User

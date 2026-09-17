@@ -13,23 +13,16 @@ use Illuminate\Validation\ValidationException;
 
 class OrderService
 {
-    /**
-     * Place an order for the given user.
-     *
-     * Runs inside a DB transaction so stock checks, stock decrements and the
-     * order rows are all committed (or rolled back) atomically.
-     *
-     * @param  array<int, array{product_id: int, quantity: int}>  $items
-     */
+    
     public function placeOrder(User $user, array $items): Order
     {
         return DB::transaction(function () use ($user, $items) {
-            // Merge duplicate product ids into a single quantity per product.
+            
             $quantities = collect($items)
                 ->groupBy('product_id')
                 ->map(fn ($group) => $group->sum('quantity'));
 
-            // Lock the rows to prevent race conditions on stock.
+            
             $products = Product::query()
                 ->whereIn('id', $quantities->keys())
                 ->lockForUpdate()
@@ -47,18 +40,13 @@ class OrderService
             $totalPrice = 0;
 
             foreach ($quantities as $productId => $quantity) {
-                /** @var Product $product */
                 $product = $products->get($productId);
-
                 if ($product->stock < $quantity) {
                     throw new InsufficientStockException($product, (int) $quantity);
                 }
-
                 $product->decrement('stock', $quantity);
-
                 $subtotal = $quantity * (float) $product->price;
                 $totalPrice += $subtotal;
-
                 $orderItems[] = [
                     'product_id' => $product->id,
                     'product_name' => $product->name,
@@ -80,9 +68,7 @@ class OrderService
         });
     }
 
-    /**
-     * Generate a unique, human-readable order number.
-     */
+   
     protected function generateOrderNumber(): string
     {
         do {
